@@ -44,7 +44,11 @@ print_message $GREEN "📌 Current version: $current_version"
 
 # Get latest tag from divkit-ios-facade
 print_message $YELLOW "🔍 Checking latest version from divkit-ios-facade..."
-latest_tag=$(curl -s https://api.github.com/repos/divkit/divkit-ios-facade/tags | grep -o '"name": "[^"]*' | head -1 | cut -d'"' -f4)
+latest_tag=$(
+    curl -s https://api.github.com/repos/divkit/divkit-ios-facade/tags \
+    --header "Authorization: Bearer $BITRISE_READONLY_PAT" \
+    --header "X-GitHub-Api-Version: 2022-11-28" | grep -o '"name": "[^"]*' | head -1 | cut -d'"' -f4
+)
 print_message $GREEN "📌 Latest version: $latest_tag"
 
 if [[ "$current_version" == "$latest_tag" ]]; then
