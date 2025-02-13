@@ -36,7 +36,12 @@ print_message $GREEN "📌 Latest version: $latest_tag"
 BRANCH="$BRANCH_PREFIX-$latest_tag"
 print_message $YELLOW "📄 Branch Name: $BRANCH"
 
-BRANCH_EXISTS=$(curl -s "https://api.github.com/repos/mustafagunes/pods-binary-container/branches/$BRANCH" | grep -q '"name":' && echo "true" || echo "false")
+BRANCH_EXISTS=$(
+    curl -s "https://api.github.com/repos/mustafagunes/pods-binary-container/branches/$BRANCH" 
+    --header "Authorization: Bearer $BITRISE_READONLY_PAT" \
+    --header "X-GitHub-Api-Version: 2022-11-28" | grep -q '"name":' && echo "true" || echo "false"
+)
+print_message $YELLOW "📄 Branch Exists: $BRANCH_EXISTS"
 if [ "$BRANCH_EXISTS" = true ]; then
     print_message $YELLOW "🛑 Target branch has already been created. Therefore the script was stopped"
     exit 1
