@@ -22,7 +22,26 @@ check_command() {
     fi
 }
 
-# Check required commands
+BRANCH_PREFIX=divkit-facade-lib
+
+# Get latest tag from divkit-ios-facade
+print_message $YELLOW "🔍 Checking latest version from divkit-ios-facade..."
+latest_tag=$(
+    curl -s https://api.github.com/repos/divkit/divkit-ios-facade/tags \
+    --header "Authorization: Bearer $BITRISE_READONLY_PAT" \
+    --header "X-GitHub-Api-Version: 2022-11-28" | grep -o '"name": "[^"]*' | head -1 | cut -d'"' -f4
+)
+print_message $GREEN "📌 Latest version: $latest_tag"
+
+BRANCH="$BRANCH_PREFIX-$latest_tag"
+print_message $YELLOW "📄 Branch Name: $BRANCH"
+
+BRANCH_EXISTS=$(curl -s "https://api.github.com/repos/mustafagunes/pods-binary-container/branches/$BRANCH" | grep -q '"name":' && echo "true" || echo "false")
+if [ "$BRANCH_EXISTS" = true ]; then
+    exit 0
+fi
+
+Check required commands
 check_command "git"
 
 # Working directory
@@ -41,15 +60,6 @@ print_message $YELLOW "🔍 Checking current version..."
 git clone --depth 1 https://github.com/mustafagunes/pods-binary-container.git
 current_version=$(grep -E 's.version\s*=' pods-binary-container/DivKitBinaryCompatibilityFacade.podspec | awk -F"[\'\"]" '{print $2}')
 print_message $GREEN "📌 Current version: $current_version"
-
-# Get latest tag from divkit-ios-facade
-print_message $YELLOW "🔍 Checking latest version from divkit-ios-facade..."
-latest_tag=$(
-    curl -s https://api.github.com/repos/divkit/divkit-ios-facade/tags \
-    --header "Authorization: Bearer $BITRISE_READONLY_PAT" \
-    --header "X-GitHub-Api-Version: 2022-11-28" | grep -o '"name": "[^"]*' | head -1 | cut -d'"' -f4
-)
-print_message $GREEN "📌 Latest version: $latest_tag"
 
 if [[ "$current_version" == "$latest_tag" ]]; then
     print_message $GREEN "✅ Version is up to date! No action needed."
@@ -100,14 +110,14 @@ sed -i '' "s/s.version.*=.*/s.version      = '$latest_tag'/" DivKitBinaryCompati
 
 # Git operations
 print_message $BLUE "📤 Committing and pushing changes..."
-git checkout -b divkit-facade-lib-$latest_tag
 
 git config --global user.email "gunes149@gmail.com"
 git config --global user.name "Mustafa GUNES"
 
+git checkout -b $BRANCH
 git add .
 git commit -m "Update DivKit to version $latest_tag"
-git push -u origin divkit-facade-lib-$latest_tag
+git push -u origin $BRANCH
 
 print_message $GREEN "✅ Update completed successfully!"
 print_message $GREEN "📌 Updated from version $current_version to $latest_tag"
