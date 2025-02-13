@@ -38,7 +38,8 @@ print_message $YELLOW "📄 Branch Name: $BRANCH"
 
 BRANCH_EXISTS=$(curl -s "https://api.github.com/repos/mustafagunes/pods-binary-container/branches/$BRANCH" | grep -q '"name":' && echo "true" || echo "false")
 if [ "$BRANCH_EXISTS" = true ]; then
-    exit 0
+    print_message $YELLOW "🛑 Target branch has already been created. Therefore the script was stopped"
+    exit 1
 fi
 
 Check required commands
