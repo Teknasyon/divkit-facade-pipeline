@@ -101,6 +101,10 @@ sed -i '' "s/s.version.*=.*/s.version      = '$latest_tag'/" DivKitBinaryCompati
 # Git operations
 print_message $BLUE "📤 Committing and pushing changes..."
 git checkout -b divkit-facade-lib-$latest_tag
+
+git config --global user.email "gunes149@gmail.com"
+git config --global user.name "Mustafa GUNES"
+
 git add .
 git commit -m "Update DivKit to version $latest_tag"
 git push -u origin divkit-facade-lib-$latest_tag
