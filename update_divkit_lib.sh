@@ -37,7 +37,7 @@ BRANCH="$BRANCH_PREFIX-$latest_tag"
 print_message $YELLOW "📄 Branch Name: $BRANCH"
 
 BRANCH_EXISTS=$(
-    curl -s "https://api.github.com/repos/mustafagunes/pods-binary-container/branches/$BRANCH" 
+    curl -s "https://api.github.com/repos/mustafagunes/pods-binary-container/branches/$BRANCH" \
     --header "Authorization: Bearer $BITRISE_READONLY_PAT" \
     --header "X-GitHub-Api-Version: 2022-11-28" | grep -q '"name":' && echo "true" || echo "false"
 )
