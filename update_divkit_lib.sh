@@ -42,7 +42,7 @@ if [ "$BRANCH_EXISTS" = true ]; then
     exit 1
 fi
 
-Check required commands
+# Check required commands
 check_command "git"
 
 # Working directory
