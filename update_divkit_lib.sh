@@ -37,7 +37,7 @@ BRANCH="$BRANCH_PREFIX-$latest_tag"
 print_message $YELLOW "📄 Branch Name: $BRANCH"
 
 BRANCH_EXISTS=$(
-    curl -s "https://api.github.com/repos/mustafagunes/pods-binary-container/branches/$BRANCH" \
+    curl -s "https://api.github.com/repos/teknasyon/pods-binary-container/branches/$BRANCH" \
     --header "Authorization: Bearer $BITRISE_READONLY_PAT" \
     --header "X-GitHub-Api-Version: 2022-11-28" | grep -q '"name":' && echo "true" || echo "false"
 )
@@ -63,7 +63,7 @@ rm -rf scipio.zip
 
 # Clone pods-binary-container to check current version
 print_message $YELLOW "🔍 Checking current version..."
-git clone --depth 1 https://github.com/mustafagunes/pods-binary-container.git
+git clone --depth 1 https://github.com/teknasyon/pods-binary-container.git
 current_version=$(grep -E 's.version\s*=' pods-binary-container/DivKitBinaryCompatibilityFacade.podspec | awk -F"[\'\"]" '{print $2}')
 print_message $GREEN "📌 Current version: $current_version"
 
