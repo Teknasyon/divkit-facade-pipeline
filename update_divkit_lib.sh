@@ -26,21 +26,35 @@ BRANCH_PREFIX=divkit-facade-lib
 
 # Get latest tag from divkit-ios-facade
 print_message $YELLOW "🔍 Checking latest version from divkit-ios-facade..."
+latest_tag=null;
+if [ -z "$BITRISE_READONLY_PAT" ]; then
+latest_tag=$(
+    curl -s https://api.github.com/repos/divkit/divkit-ios-facade/tags | grep -o '"name": "[^"]*' | head -1 | cut -d'"' -f4
+)
+else
 latest_tag=$(
     curl -s https://api.github.com/repos/divkit/divkit-ios-facade/tags \
     --header "Authorization: Bearer $BITRISE_READONLY_PAT" \
     --header "X-GitHub-Api-Version: 2022-11-28" | grep -o '"name": "[^"]*' | head -1 | cut -d'"' -f4
 )
+fi
+
 print_message $GREEN "📌 Latest version: $latest_tag"
 
 BRANCH="$BRANCH_PREFIX-$latest_tag"
 print_message $YELLOW "📄 Branch Name: $BRANCH"
-
+BRANCH_EXISTS=""
+if [ -z "$BITRISE_READONLY_PAT" ]; then
+BRANCH_EXISTS=$(
+    curl -s "https://api.github.com/repos/teknasyon/pods-binary-container/branches/$BRANCH" | grep -q '"name":' && echo "true" || echo "false"
+)
+else
 BRANCH_EXISTS=$(
     curl -s "https://api.github.com/repos/teknasyon/pods-binary-container/branches/$BRANCH" \
     --header "Authorization: Bearer $BITRISE_READONLY_PAT" \
     --header "X-GitHub-Api-Version: 2022-11-28" | grep -q '"name":' && echo "true" || echo "false"
 )
+fi
 print_message $YELLOW "📄 Branch Exists: $BRANCH_EXISTS"
 if [ "$BRANCH_EXISTS" = true ]; then
     print_message $YELLOW "🛑 Target branch has already been created. Therefore the script was stopped"
@@ -63,7 +77,7 @@ rm -rf scipio.zip
 
 # Clone pods-binary-container to check current version
 print_message $YELLOW "🔍 Checking current version..."
-git clone --depth 1 https://github.com/teknasyon/pods-binary-container.git
+git clone --depth 1 git@github.com:Teknasyon/pods-binary-container.git
 current_version=$(grep -E 's.version\s*=' pods-binary-container/DivKitBinaryCompatibilityFacade.podspec | awk -F"[\'\"]" '{print $2}')
 print_message $GREEN "📌 Current version: $current_version"
 
@@ -76,7 +90,7 @@ print_message $YELLOW "🔄 Update needed. Starting update process..."
 
 # Clone divkit-ios-facade repository
 print_message $BLUE "📥 Cloning divkit-ios-facade repository..."
-git clone --depth 1 https://github.com/divkit/divkit-ios-facade.git
+git clone --depth 1 git@github.com:divkit/divkit-ios-facade.git
 cd divkit-ios-facade
 
 # Run scipio command
@@ -117,8 +131,10 @@ sed -i '' "s/s.version.*=.*/s.version      = '$latest_tag'/" DivKitBinaryCompati
 # Git operations
 print_message $BLUE "📤 Committing and pushing changes..."
 
-git config --global user.email "gunes149@gmail.com"
-git config --global user.name "Mustafa GUNES"
+if [ -z "$BITRISE_READONLY_PAT" ]; then
+    git config --global user.email "gunes149@gmail.com"
+    git config --global user.name "Mustafa GUNES"
+fi
 
 git checkout -b $BRANCH
 git add .
